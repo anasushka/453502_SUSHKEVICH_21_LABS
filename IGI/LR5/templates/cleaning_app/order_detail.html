@@ -57,10 +57,7 @@
 {% if order.status == 'pending' %}
 <div class="card" style="display:flex;gap:10px;">
     <a href="{% url 'order_edit' order.pk %}" class="btn btn-primary">Редактировать</a>
-    <form method="post" action="{% url 'order_delete' order.pk %}" onsubmit="return confirm('Удалить заказ #{{ order.id }}?');">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Удалить заказ</button>
-    </form>
+    <a href="{% url 'order_delete' order.pk %}" class="btn btn-danger">Удалить заказ</a>
 </div>
 {% endif %}
 {% endblock %}

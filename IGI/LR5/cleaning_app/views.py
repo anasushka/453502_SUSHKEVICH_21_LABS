@@ -1,9 +1,13 @@
+import base64
 import calendar
-import json
+import io
 import logging
 import statistics
 from datetime import date
 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import requests
 from django.contrib import messages
 from django.contrib.auth import login
@@ -25,6 +29,49 @@ from .models import (
 )
 
 logger = logging.getLogger('cleaning_app')
+
+
+# ---------------------------------------------------------------------------
+# Chart helpers (Python/matplotlib — не JS)
+# ---------------------------------------------------------------------------
+
+def _chart_to_base64(fig):
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+    buf.seek(0)
+    img_b64 = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close(fig)
+    return img_b64
+
+
+def _make_status_chart(status_labels, status_counts):
+    colors = ['#ffc107', '#17a2b8', '#6c757d', '#28a745', '#dc3545']
+    fig, ax = plt.subplots(figsize=(5, 4))
+    if status_counts:
+        ax.pie(status_counts, labels=status_labels, autopct='%1.1f%%',
+               colors=colors[:len(status_counts)], startangle=90)
+        ax.set_title('Статусы заказов')
+    else:
+        ax.text(0.5, 0.5, 'Нет данных', ha='center', va='center')
+    return _chart_to_base64(fig)
+
+
+def _make_revenue_chart(type_labels, type_revenues):
+    fig, ax = plt.subplots(figsize=(6, 4))
+    if type_labels:
+        bars = ax.bar(range(len(type_labels)), type_revenues, color='#1a73e8')
+        ax.set_xticks(range(len(type_labels)))
+        ax.set_xticklabels(type_labels, rotation=30, ha='right', fontsize=8)
+        ax.set_ylabel('Выручка (BYN)')
+        ax.set_title('Выручка по типам услуг')
+        for bar, val in zip(bars, type_revenues):
+            if val > 0:
+                ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(),
+                        f'{val:.0f}', ha='center', va='bottom', fontsize=8)
+    else:
+        ax.text(0.5, 0.5, 'Нет данных', ha='center', va='center')
+    fig.tight_layout()
+    return _chart_to_base64(fig)
 
 
 # ---------------------------------------------------------------------------
@@ -351,16 +398,18 @@ def order_edit(request, pk):
 
 
 @login_required
-@require_http_methods(['POST'])
 def order_delete(request, pk):
     order = get_object_or_404(Order, pk=pk)
     if not _can_edit_order(request.user, order):
         return HttpResponseForbidden('Доступ запрещён.')
-    order_id = order.id
-    order.delete()
-    messages.success(request, f'Заказ #{order_id} удалён.')
-    logger.info('Order #%s deleted', order_id)
-    return redirect('orders')
+    if request.method == 'POST':
+        order_id = order.id
+        order.delete()
+        messages.success(request, f'Заказ #{order_id} удалён.')
+        logger.info('Order #%s deleted', order_id)
+        return redirect('orders')
+    ctx = {**_common_context(), 'order': order}
+    return render(request, 'cleaning_app/order_confirm_delete.html', ctx)
 
 
 def _can_access_order(user, order):
@@ -493,15 +542,17 @@ def statistics_view(request):
     type_labels = [d['name'] for d in type_revenue_qs]
     type_revenues = [float(d['revenue'] or 0) for d in type_revenue_qs]
 
+    # Графики через matplotlib (Python, не JS)
+    status_chart = _make_status_chart(status_labels, status_counts)
+    revenue_chart = _make_revenue_chart(type_labels, type_revenues)
+
     ctx = {
         **_common_context(),
         'stats': stats,
         'services_alpha': services_alpha,
         'clients_spending': clients_spending,
-        'status_labels': json.dumps(status_labels, ensure_ascii=False),
-        'status_counts': json.dumps(status_counts),
-        'type_labels': json.dumps(type_labels, ensure_ascii=False),
-        'type_revenues': json.dumps(type_revenues),
+        'status_chart': status_chart,
+        'revenue_chart': revenue_chart,
         'total_orders': Order.objects.count(),
         'total_clients': Client.objects.count(),
         'total_services': Service.objects.filter(is_active=True).count(),

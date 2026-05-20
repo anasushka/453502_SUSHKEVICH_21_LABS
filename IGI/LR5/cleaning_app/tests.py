@@ -517,10 +517,11 @@ class OrderViewsTest(TestCase):
         self.assertIn(r.status_code, [302, 200])
         self.assertFalse(Order.objects.filter(pk=oid).exists())
 
-    def test_order_delete_get_not_allowed(self):
+    def test_order_delete_get_shows_confirmation(self):
         order = make_order(self.client_obj)
         r = self.c.get(reverse('order_delete', args=[order.pk]))
-        self.assertEqual(r.status_code, 405)
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, str(order.id))
 
     def test_order_edit_get(self):
         order = make_order(self.client_obj)

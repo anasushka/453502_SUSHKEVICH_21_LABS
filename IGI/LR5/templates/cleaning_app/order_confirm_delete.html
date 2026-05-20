@@ -1,0 +1,19 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}Удалить заказ #{{ order.id }} — КлинингПро{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:500px;margin:0 auto;text-align:center;">
+    <h2 style="color:#d93025;">Удалить заказ #{{ order.id }}?</h2>
+    <p style="margin:15px 0;color:#555;">
+        Адрес: <strong>{{ order.address }}</strong><br>
+        Дата: <strong>{{ order.scheduled_date|date:"d.m.Y" }}</strong><br>
+        Сумма: <strong>{{ order.total_price }} BYN</strong>
+    </p>
+    <p style="color:#d93025;margin-bottom:20px;">Это действие нельзя отменить.</p>
+    <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Да, удалить</button>
+    </form>
+    <a href="{% url 'order_detail' order.pk %}" class="btn btn-secondary" style="margin-left:10px;">Отмена</a>
+</div>
+{% endblock %}

@@ -91,4 +91,137 @@
         </tbody>
     </table>
 </div>
+
+{# Вариант 21: планируемые работы, сгруппированные по клиентам #}
+<div class="card">
+    <h2>Планируемые работы (по дате, по клиентам)</h2>
+    {% if planned_orders %}
+    <table style="margin-top:12px;">
+        <thead>
+            <tr><th>Клиент</th><th>Адрес</th><th>Дата работ</th><th>Статус</th><th>Сумма</th></tr>
+        </thead>
+        <tbody>
+            {% regroup planned_orders by client as orders_by_client %}
+            {% for group in orders_by_client %}
+            <tr style="background:#e8f0fe;">
+                <td colspan="5"><strong>{{ group.grouper.user.get_full_name }}</strong>
+                    — {{ group.grouper.phone }} ({{ group.grouper.get_client_type_display }})</td>
+            </tr>
+            {% for order in group.list %}
+            <tr>
+                <td style="padding-left:20px;">{{ order.client.user.get_full_name }}</td>
+                <td>{{ order.address|truncatechars:30 }}</td>
+                <td>{{ order.scheduled_date|date:"d.m.Y" }}</td>
+                <td>
+                    {% if order.status == 'pending' %}<span class="badge badge-warning">Ожидание</span>
+                    {% elif order.status == 'confirmed' %}<span class="badge badge-info">Подтверждён</span>
+                    {% elif order.status == 'in_progress' %}<span class="badge badge-secondary">В работе</span>
+                    {% endif %}
+                </td>
+                <td>{{ order.total_price }} BYN</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="margin-top:10px;color:#666;">Нет планируемых работ.</p>
+    {% endif %}
+</div>
+
+{# Вариант 21: стоимость услуг для конкретного клиента за период #}
+<div class="card">
+    <h2>Стоимость услуг клиента за период</h2>
+    <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:12px;">
+        <div>
+            <label style="font-size:13px;font-weight:bold;">Клиент</label>
+            <select name="filter_client" class="form-control">
+                <option value="">— выберите —</option>
+                {% for c in all_clients %}
+                <option value="{{ c.pk }}" {% if filter_client_id == c.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ c.user.get_full_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label style="font-size:13px;font-weight:bold;">С</label>
+            <input type="date" name="date_from" value="{{ filter_date_from }}" class="form-control">
+        </div>
+        <div>
+            <label style="font-size:13px;font-weight:bold;">По</label>
+            <input type="date" name="date_to" value="{{ filter_date_to }}" class="form-control">
+        </div>
+        {% if filter_employee_id %}<input type="hidden" name="filter_employee" value="{{ filter_employee_id }}">{% endif %}
+        <button type="submit" class="btn btn-primary">Показать</button>
+    </form>
+    {% if selected_client %}
+    <h3 style="margin-top:15px;">{{ selected_client.user.get_full_name }}</h3>
+    {% if client_period_orders %}
+    <table style="margin-top:8px;">
+        <thead><tr><th>#</th><th>Дата работ</th><th>Адрес</th><th>Статус</th><th>Сумма</th></tr></thead>
+        <tbody>
+            {% for order in client_period_orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.scheduled_date|date:"d.m.Y" }}</td>
+                <td>{{ order.address|truncatechars:30 }}</td>
+                <td>{{ order.get_status_display }}</td>
+                <td>{{ order.total_price }} BYN</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr><td colspan="4" style="text-align:right;font-weight:bold;">Итого:</td>
+                <td style="font-weight:bold;color:#1a73e8;">{{ client_period_total }} BYN</td></tr>
+        </tfoot>
+    </table>
+    {% else %}
+    <p style="color:#666;margin-top:8px;">Заказов за выбранный период нет.</p>
+    {% endif %}
+    {% endif %}
+</div>
+
+{# Вариант 21: все клиенты выбранного сотрудника #}
+<div class="card">
+    <h2>Клиенты выбранного сотрудника</h2>
+    <form method="get" style="display:flex;gap:10px;align-items:flex-end;margin-top:12px;">
+        <div>
+            <label style="font-size:13px;font-weight:bold;">Сотрудник</label>
+            <select name="filter_employee" class="form-control">
+                <option value="">— выберите —</option>
+                {% for e in all_employees %}
+                <option value="{{ e.pk }}" {% if filter_employee_id == e.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ e.user.get_full_name }} ({{ e.position }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if filter_client_id %}<input type="hidden" name="filter_client" value="{{ filter_client_id }}">{% endif %}
+        {% if filter_date_from %}<input type="hidden" name="date_from" value="{{ filter_date_from }}">{% endif %}
+        {% if filter_date_to %}<input type="hidden" name="date_to" value="{{ filter_date_to }}">{% endif %}
+        <button type="submit" class="btn btn-primary">Показать</button>
+    </form>
+    {% if selected_employee %}
+    <h3 style="margin-top:15px;">{{ selected_employee.user.get_full_name }} — {{ selected_employee.position }}</h3>
+    {% if employee_clients %}
+    <table style="margin-top:8px;">
+        <thead><tr><th>Клиент</th><th>Телефон</th><th>Тип</th><th>Адрес</th></tr></thead>
+        <tbody>
+            {% for c in employee_clients %}
+            <tr>
+                <td>{{ c.user.get_full_name }}</td>
+                <td>{{ c.phone }}</td>
+                <td>{{ c.get_client_type_display }}</td>
+                <td>{{ c.address|truncatechars:30 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color:#666;margin-top:8px;">У этого сотрудника нет клиентов.</p>
+    {% endif %}
+    {% endif %}
+</div>
+
 {% endblock %}

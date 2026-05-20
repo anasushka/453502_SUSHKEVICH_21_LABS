@@ -1,6 +1,17 @@
 version: '3.9'
 
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: cleaningpro
+      POSTGRES_USER: cleaningpro
+      POSTGRES_PASSWORD: cleaningpro123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   web:
     build: .
     ports:
@@ -8,9 +19,16 @@ services:
     volumes:
       - .:/app
     environment:
+      - DATABASE_URL=postgresql://cleaningpro:cleaningpro123@db:5432/cleaningpro
       - DJANGO_SECRET_KEY=docker-secret-key-change-in-production
+      - DEBUG=True
       - LOG_LEVEL=INFO
+    depends_on:
+      - db
     command: >
       sh -c "python manage.py migrate &&
              python manage.py seed_data &&
              python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  postgres_data:

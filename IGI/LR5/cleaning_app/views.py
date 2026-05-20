@@ -546,6 +546,50 @@ def statistics_view(request):
     status_chart = _make_status_chart(status_labels, status_counts)
     revenue_chart = _make_revenue_chart(type_labels, type_revenues)
 
+    # Вариант 21: плановые работы, сгруппированные по клиентам (сортировка по дате)
+    planned_orders = (
+        Order.objects
+        .filter(status__in=['pending', 'confirmed', 'in_progress'])
+        .select_related('client__user', 'employee__user')
+        .order_by('client__user__last_name', 'scheduled_date')
+    )
+
+    # Вариант 21: стоимость услуг конкретного клиента за период
+    filter_client_id = request.GET.get('filter_client', '')
+    filter_date_from = request.GET.get('date_from', '')
+    filter_date_to = request.GET.get('date_to', '')
+    client_period_orders = None
+    client_period_total = None
+    selected_client = None
+    if filter_client_id:
+        try:
+            selected_client = Client.objects.get(pk=filter_client_id)
+            qs = Order.objects.filter(client=selected_client)
+            if filter_date_from:
+                qs = qs.filter(scheduled_date__gte=filter_date_from)
+            if filter_date_to:
+                qs = qs.filter(scheduled_date__lte=filter_date_to)
+            client_period_orders = qs.order_by('scheduled_date')
+            client_period_total = sum(float(o.total_price) for o in client_period_orders)
+        except Client.DoesNotExist:
+            pass
+
+    # Вариант 21: все клиенты выбранного сотрудника
+    filter_employee_id = request.GET.get('filter_employee', '')
+    employee_clients = None
+    selected_employee = None
+    if filter_employee_id:
+        try:
+            selected_employee = Employee.objects.get(pk=filter_employee_id)
+            employee_clients = (
+                Client.objects
+                .filter(orders__employee=selected_employee)
+                .distinct()
+                .select_related('user')
+            )
+        except Employee.DoesNotExist:
+            pass
+
     ctx = {
         **_common_context(),
         'stats': stats,
@@ -556,6 +600,19 @@ def statistics_view(request):
         'total_orders': Order.objects.count(),
         'total_clients': Client.objects.count(),
         'total_services': Service.objects.filter(is_active=True).count(),
+        # Вариант 21
+        'planned_orders': planned_orders,
+        'all_clients': Client.objects.select_related('user').order_by('user__last_name'),
+        'all_employees': Employee.objects.select_related('user').order_by('user__last_name'),
+        'selected_client': selected_client,
+        'client_period_orders': client_period_orders,
+        'client_period_total': client_period_total,
+        'filter_client_id': filter_client_id,
+        'filter_date_from': filter_date_from,
+        'filter_date_to': filter_date_to,
+        'selected_employee': selected_employee,
+        'employee_clients': employee_clients,
+        'filter_employee_id': filter_employee_id,
     }
     return render(request, 'cleaning_app/statistics.html', ctx)
 

@@ -328,10 +328,13 @@ class Command(BaseCommand):
              'Обязанности: уборка прилегающей территории, вывоз мусора, уход за газонами.'),
         ]
         for title, sal_from, sal_to, desc in vacs_data:
+            req, _, body = desc.partition('Обязанности:')
             Vacancy.objects.get_or_create(
                 title=title,
                 defaults={'salary_from': sal_from, 'salary_to': sal_to,
-                          'description': desc, 'is_active': True}
+                          'description': ('Обязанности:' + body).strip() if body else desc,
+                          'requirements': req.strip(),
+                          'is_active': True}
             )
 
         self.stdout.write(self.style.SUCCESS('Done! Seeded all demo data.'))

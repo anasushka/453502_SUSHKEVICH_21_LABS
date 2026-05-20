@@ -38,3 +38,7 @@ INFO 2026-05-20 22:57:55,029 views 9125 126637411799168 New client registered: n
 INFO 2026-05-20 22:58:00,983 views 9125 126637411799168 Order #1 deleted
 INFO 2026-05-20 22:58:06,960 views 9125 126637411799168 Home page visited by AnonymousUser
 INFO 2026-05-20 22:58:11,344 views 9125 126637411799168 Review added by client  (Физическое лицо)
+INFO 2026-05-20 23:17:30,681 views 12870 137157210108032 New client registered: newreg
+INFO 2026-05-20 23:17:35,963 views 12870 137157210108032 Order #1 deleted
+INFO 2026-05-20 23:17:41,288 views 12870 137157210108032 Home page visited by AnonymousUser
+INFO 2026-05-20 23:17:42,629 views 12870 137157210108032 Review added by client  (Физическое лицо)

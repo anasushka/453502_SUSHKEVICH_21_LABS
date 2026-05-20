@@ -1,0 +1,104 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}Профиль — КлинингПро{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;">
+<div>
+<div class="card">
+    <h2>{{ user.get_full_name|default:user.username }}</h2>
+    <p style="color:#666;margin-top:4px;">@{{ user.username }}</p>
+    {% if user.email %}<p style="margin-top:6px;font-size:13px;">📧 {{ user.email }}</p>{% endif %}
+    <div style="margin-top:10px;">
+        {% if user.is_staff %}
+        <span class="badge badge-warning">Администратор</span>
+        {% endif %}
+        {% if employee %}
+        <span class="badge badge-info">Сотрудник</span>
+        {% elif client %}
+        <span class="badge badge-success">Клиент</span>
+        {% endif %}
+    </div>
+</div>
+
+{% if client %}
+<div class="card">
+    <h3>Данные клиента</h3>
+    <table style="margin-top:8px;width:100%;">
+        <tr><th>Телефон</th><td>{{ client.phone }}</td></tr>
+        <tr><th>Тип</th><td>{{ client.get_client_type_display }}</td></tr>
+        <tr><th>Адрес</th><td>{{ client.address }}</td></tr>
+        {% if client.company_name %}<tr><th>Компания</th><td>{{ client.company_name }}</td></tr>{% endif %}
+        <tr><th>Дата рождения</th><td>{{ client.birth_date|date:"d.m.Y" }}</td></tr>
+        <tr><th>Возраст</th><td>{{ client.age }} лет</td></tr>
+        <tr><th>Клиент с</th><td>{{ client.created_at|date:"d.m.Y" }}</td></tr>
+    </table>
+</div>
+{% endif %}
+
+{% if employee %}
+<div class="card">
+    <h3>Данные сотрудника</h3>
+    <table style="margin-top:8px;width:100%;">
+        <tr><th>Должность</th><td>{{ employee.position }}</td></tr>
+        <tr><th>Специализация</th><td>{{ employee.specialization.name|default:"—" }}</td></tr>
+        <tr><th>Телефон</th><td>{{ employee.phone }}</td></tr>
+        <tr><th>Дата найма</th><td>{{ employee.hire_date|date:"d.m.Y" }}</td></tr>
+    </table>
+</div>
+{% endif %}
+</div>
+
+<div>
+{% if recent_orders %}
+<div class="card">
+    <h2>Последние заказы</h2>
+    <table style="margin-top:12px;">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Адрес</th>
+                <th>Дата работ</th>
+                <th>Статус</th>
+                <th>Сумма</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in recent_orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.address|truncatechars:25 }}</td>
+                <td>{{ order.scheduled_date|date:"d.m.Y" }}</td>
+                <td>
+                    {% if order.status == 'pending' %}<span class="badge badge-warning">Ожидание</span>
+                    {% elif order.status == 'confirmed' %}<span class="badge badge-info">Подтверждён</span>
+                    {% elif order.status == 'in_progress' %}<span class="badge badge-secondary">В работе</span>
+                    {% elif order.status == 'completed' %}<span class="badge badge-success">Завершён</span>
+                    {% elif order.status == 'cancelled' %}<span class="badge badge-danger">Отменён</span>
+                    {% endif %}
+                </td>
+                <td>{{ order.total_price }} BYN</td>
+                <td><a href="{% url 'order_detail' order.pk %}" class="btn btn-secondary" style="padding:3px 8px;font-size:12px;">Открыть</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'orders' %}" class="btn btn-primary" style="margin-top:12px;">Все заказы</a>
+</div>
+{% else %}
+<div class="card">
+    <h2>Заказы</h2>
+    <p style="margin-top:8px;color:#666;">Заказов нет.</p>
+    {% if client %}
+    <a href="{% url 'order_create' %}" class="btn btn-primary" style="margin-top:10px;">Создать первый заказ</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="card">
+    <h3>Безопасность</h3>
+    <a href="{% url 'password_change' %}" class="btn btn-secondary" style="margin-top:8px;">Изменить пароль</a>
+</div>
+</div>
+</div>
+{% endblock %}

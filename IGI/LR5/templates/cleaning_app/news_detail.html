@@ -1,0 +1,14 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}{{ article.title }} — КлинингПро{% endblock %}
+
+{% block content %}
+<div class="card">
+    <a href="{% url 'news' %}" class="btn btn-secondary" style="margin-bottom:15px;">← Назад к новостям</a>
+    <h1 style="margin-top:10px;">{{ article.title }}</h1>
+    <p style="color:#666;font-size:13px;margin:8px 0;">Опубликовано: {{ article.created_at|date:"d.m.Y H:i" }}</p>
+    {% if article.summary %}
+    <p style="font-style:italic;color:#555;border-left:3px solid #1a73e8;padding-left:10px;margin:10px 0;">{{ article.summary }}</p>
+    {% endif %}
+    <div style="line-height:1.7;margin-top:15px;">{{ article.content|linebreaks }}</div>
+</div>
+{% endblock %}

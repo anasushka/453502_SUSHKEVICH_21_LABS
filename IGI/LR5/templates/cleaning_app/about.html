@@ -1,0 +1,31 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}О компании — КлинингПро{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>О компании</h1>
+    {% if company %}
+    <table style="margin-top:15px;max-width:600px;">
+        <tr><th>Название</th><td>{{ company.title }}</td></tr>
+        <tr><th>Телефон</th><td>{{ company.phone }}</td></tr>
+        <tr><th>Email</th><td>{{ company.email }}</td></tr>
+        <tr><th>Адрес</th><td>{{ company.address }}</td></tr>
+        <tr><th>Год основания</th><td>{{ company.founded_year }}</td></tr>
+    </table>
+    <div style="margin-top:15px;">
+        <h3>О нас</h3>
+        <p style="margin-top:8px;line-height:1.6;">{{ company.description }}</p>
+    </div>
+    {% else %}
+    <p style="margin-top:10px;">Информация о компании пока не добавлена.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>Часовой пояс и время</h3>
+    <p>Часовой пояс: <strong>{{ timezone_name }}</strong></p>
+    <p>Местное время: <strong>{{ local_now|date:"d/m/Y H:i" }}</strong></p>
+    <p>UTC: <strong>{{ utc_now|date:"d/m/Y H:i" }}</strong></p>
+    <pre style="margin-top:10px;">{{ calendar_text }}</pre>
+</div>
+{% endblock %}

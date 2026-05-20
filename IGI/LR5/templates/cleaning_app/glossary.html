@@ -1,0 +1,20 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}Словарь / FAQ — КлинингПро{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Словарь терминов / FAQ</h1>
+    <p style="margin-top:8px;color:#666;">Ответы на часто задаваемые вопросы о клининговых услугах.</p>
+</div>
+{% if faqs %}
+    {% for faq in faqs %}
+    <div class="card">
+        <h3 style="color:#1a73e8;">{{ forloop.counter }}. {{ faq.question }}</h3>
+        <p style="margin-top:8px;line-height:1.6;">{{ faq.answer }}</p>
+        <p style="font-size:12px;color:#999;margin-top:6px;">Добавлено: {{ faq.created_at|date:"d.m.Y" }}</p>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="card"><p>Вопросы и ответы пока не добавлены.</p></div>
+{% endif %}
+{% endblock %}

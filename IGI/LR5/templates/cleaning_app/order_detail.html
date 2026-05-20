@@ -1,0 +1,66 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}Заказ #{{ order.id }} — КлинингПро{% endblock %}
+
+{% block content %}
+<a href="{% url 'orders' %}" class="btn btn-secondary" style="margin-bottom:15px;">← К списку заказов</a>
+
+<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <h1>Заказ #{{ order.id }}</h1>
+        {% if order.status == 'pending' %}<span class="badge badge-warning" style="font-size:14px;padding:6px 12px;">Ожидание</span>
+        {% elif order.status == 'confirmed' %}<span class="badge badge-info" style="font-size:14px;padding:6px 12px;">Подтверждён</span>
+        {% elif order.status == 'in_progress' %}<span class="badge badge-secondary" style="font-size:14px;padding:6px 12px;">В работе</span>
+        {% elif order.status == 'completed' %}<span class="badge badge-success" style="font-size:14px;padding:6px 12px;">Завершён</span>
+        {% elif order.status == 'cancelled' %}<span class="badge badge-danger" style="font-size:14px;padding:6px 12px;">Отменён</span>
+        {% endif %}
+    </div>
+    <table style="margin-top:15px;max-width:700px;">
+        <tr><th>Клиент</th><td>{{ order.client.user.get_full_name }}</td></tr>
+        <tr><th>Сотрудник</th><td>{{ order.employee.user.get_full_name|default:"Не назначен" }}</td></tr>
+        <tr><th>Адрес</th><td>{{ order.address }}</td></tr>
+        <tr><th>Дата работ</th><td>{{ order.scheduled_date|date:"d.m.Y" }}</td></tr>
+        <tr><th>Создан</th><td>{{ order.created_at|date:"d.m.Y H:i" }}</td></tr>
+        {% if order.notes %}<tr><th>Примечания</th><td>{{ order.notes }}</td></tr>{% endif %}
+    </table>
+</div>
+
+<div class="card">
+    <h2>Услуги в заказе</h2>
+    <table style="margin-top:12px;">
+        <thead>
+            <tr>
+                <th>Услуга</th>
+                <th>Цена за ед.</th>
+                <th>Количество</th>
+                <th>Итого</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for os in order_services %}
+            <tr>
+                <td>{{ os.service.name }}</td>
+                <td>{{ os.price }} BYN</td>
+                <td>{{ os.quantity }}</td>
+                <td>{{ os.subtotal }} BYN</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" style="text-align:right;font-weight:bold;">Итого:</td>
+                <td style="font-weight:bold;font-size:16px;color:#1a73e8;">{{ order.total_price }} BYN</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+{% if order.status == 'pending' %}
+<div class="card" style="display:flex;gap:10px;">
+    <a href="{% url 'order_edit' order.pk %}" class="btn btn-primary">Редактировать</a>
+    <form method="post" action="{% url 'order_delete' order.pk %}" onsubmit="return confirm('Удалить заказ #{{ order.id }}?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить заказ</button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

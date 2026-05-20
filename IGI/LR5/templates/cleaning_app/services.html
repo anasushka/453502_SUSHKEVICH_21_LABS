@@ -1,0 +1,64 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}Услуги — КлинингПро{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Услуги</h1>
+    <form method="get" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px;">
+        <div>
+            <label style="font-size:13px;font-weight:bold;">Поиск</label>
+            {{ form.search }}
+        </div>
+        <div>
+            <label style="font-size:13px;font-weight:bold;">Тип услуги</label>
+            {{ form.service_type }}
+        </div>
+        <div>
+            <label style="font-size:13px;font-weight:bold;">Цена от</label>
+            {{ form.min_price }}
+        </div>
+        <div>
+            <label style="font-size:13px;font-weight:bold;">Цена до</label>
+            {{ form.max_price }}
+        </div>
+        <div>
+            <label style="font-size:13px;font-weight:bold;">Сортировка</label>
+            {{ form.sort_by }}
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:6px;">
+            <button type="submit" class="btn btn-primary">Найти</button>
+            <a href="{% url 'services' %}" class="btn btn-secondary">Сброс</a>
+        </div>
+    </form>
+</div>
+
+{% if services %}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px;">
+    {% for service in services %}
+    <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;">
+        <div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <h3><a href="{% url 'service_detail' service.pk %}" style="color:#1a73e8;text-decoration:none;">{{ service.name }}</a></h3>
+                {% if service.service_type.icon %}
+                <span style="font-size:20px;">{{ service.service_type.icon }}</span>
+                {% endif %}
+            </div>
+            <span class="badge badge-info" style="margin:4px 0;display:inline-block;">{{ service.service_type.name }}</span>
+            <p style="margin-top:6px;font-size:13px;color:#555;">{{ service.description|truncatewords:20 }}</p>
+        </div>
+        <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:18px;color:#1a73e8;">{{ service.price }} BYN</strong>
+            <span style="font-size:12px;color:#888;">за {{ service.unit }}</span>
+            {% if user.is_authenticated %}
+            <a href="{% url 'order_create' %}?service={{ service.pk }}" class="btn btn-primary" style="padding:6px 12px;">Заказать</a>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-secondary" style="padding:6px 12px;">Войти</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card"><p>Услуги не найдены. Попробуйте изменить параметры поиска.</p></div>
+{% endif %}
+{% endblock %}

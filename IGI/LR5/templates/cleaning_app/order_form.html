@@ -1,0 +1,68 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}{{ title }} — КлинингПро{% endblock %}
+
+{% block content %}
+{% if order %}
+<a href="{% url 'order_detail' order.pk %}" class="btn btn-secondary" style="margin-bottom:15px;">← Назад к заказу</a>
+{% else %}
+<a href="{% url 'services' %}" class="btn btn-secondary" style="margin-bottom:15px;">← К услугам</a>
+{% endif %}
+
+<div class="card">
+    <h1>{{ title }}</h1>
+    <form method="post" style="margin-top:15px;">
+        {% csrf_token %}
+        <h3 style="margin-bottom:10px;">Детали заказа</h3>
+        {% for field in form %}
+        <div class="form-group">
+            <label>{{ field.label }} {% if field.field.required %}<span style="color:red;">*</span>{% endif %}</label>
+            {{ field }}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                <p style="color:red;font-size:12px;margin-top:4px;">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <h3 style="margin:20px 0 10px;">Услуги</h3>
+        {{ formset.management_form }}
+        {% for fs_form in formset %}
+        <div style="border:1px solid #ddd;border-radius:4px;padding:12px;margin-bottom:10px;background:#fafafa;">
+            <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:10px;align-items:flex-end;">
+                <div class="form-group" style="margin:0;">
+                    <label>{{ fs_form.service.label }}</label>
+                    {{ fs_form.service }}
+                    {% for err in fs_form.service.errors %}<p style="color:red;font-size:12px;">{{ err }}</p>{% endfor %}
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>{{ fs_form.quantity.label }}</label>
+                    {{ fs_form.quantity }}
+                    {% for err in fs_form.quantity.errors %}<p style="color:red;font-size:12px;">{{ err }}</p>{% endfor %}
+                </div>
+                <div style="padding-bottom:4px;">
+                    {% if fs_form.DELETE %}
+                    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;color:#d93025;">
+                        {{ fs_form.DELETE }} Удалить
+                    </label>
+                    {% endif %}
+                </div>
+            </div>
+            {{ fs_form.id }}
+        </div>
+        {% endfor %}
+        {% if formset.non_form_errors %}
+        <p style="color:red;">{{ formset.non_form_errors }}</p>
+        {% endif %}
+
+        <div style="margin-top:20px;display:flex;gap:10px;">
+            <button type="submit" class="btn btn-primary">Сохранить заказ</button>
+            {% if order %}
+            <a href="{% url 'order_detail' order.pk %}" class="btn btn-secondary">Отмена</a>
+            {% else %}
+            <a href="{% url 'services' %}" class="btn btn-secondary">Отмена</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}Новости — КлинингПро{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Новости</h1>
+</div>
+{% if articles %}
+    {% for article in articles %}
+    <div class="card">
+        <h2><a href="{% url 'news_detail' article.pk %}" style="color:#1a73e8;text-decoration:none;">{{ article.title }}</a></h2>
+        <p style="color:#666;font-size:13px;margin:6px 0;">{{ article.created_at|date:"d.m.Y" }}</p>
+        <p>{{ article.summary }}</p>
+        <a href="{% url 'news_detail' article.pk %}" class="btn btn-primary" style="margin-top:10px;">Читать</a>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="card"><p>Новостей пока нет.</p></div>
+{% endif %}
+{% endblock %}

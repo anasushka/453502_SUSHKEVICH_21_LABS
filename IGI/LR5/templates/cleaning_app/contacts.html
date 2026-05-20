@@ -1,0 +1,40 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}Контакты — КлинингПро{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Контакты</h1>
+    <div style="margin-top:12px;">
+        <p><strong>Телефон:</strong> +375 (17) 123-45-67</p>
+        <p><strong>Email:</strong> info@cleaningpro.by</p>
+        <p><strong>Адрес:</strong> г. Минск, ул. Примерная, 1</p>
+        <p><strong>Режим работы:</strong> Пн–Пт 8:00–20:00, Сб–Вс 9:00–18:00</p>
+    </div>
+</div>
+
+{% if employees %}
+<div class="card">
+    <h2>Наши сотрудники</h2>
+    <table style="margin-top:12px;">
+        <thead>
+            <tr>
+                <th>ФИО</th>
+                <th>Должность</th>
+                <th>Специализация</th>
+                <th>Телефон</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in employees %}
+            <tr>
+                <td>{{ emp.user.get_full_name }}</td>
+                <td>{{ emp.position }}</td>
+                <td>{{ emp.specialization.name|default:"—" }}</td>
+                <td>{{ emp.phone }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

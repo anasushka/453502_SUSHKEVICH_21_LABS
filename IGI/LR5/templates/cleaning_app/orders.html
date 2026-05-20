@@ -1,0 +1,80 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}Заказы — КлинингПро{% endblock %}
+
+{% block content %}
+<div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+    <h1>Заказы</h1>
+    {% if user.is_authenticated and not user.is_staff %}
+    {% with user.client_profile as client %}
+    {% if client %}
+    <a href="{% url 'order_create' %}" class="btn btn-primary">+ Новый заказ</a>
+    {% endif %}
+    {% endwith %}
+    {% endif %}
+</div>
+
+<div class="card">
+    <form method="get" style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:flex-end;">
+        <div>
+            <label style="font-size:13px;font-weight:bold;">Поиск</label>
+            {{ form.search }}
+        </div>
+        <div>
+            <label style="font-size:13px;font-weight:bold;">Статус</label>
+            {{ form.status }}
+        </div>
+        <div>
+            <label style="font-size:13px;font-weight:bold;">Сортировка</label>
+            {{ form.sort_by }}
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </div>
+    </form>
+</div>
+
+{% if orders %}
+<table class="card" style="padding:0;overflow:hidden;">
+    <thead>
+        <tr>
+            <th>#</th>
+            {% if user.is_staff %}<th>Клиент</th>{% endif %}
+            {% if user.is_staff %}<th>Сотрудник</th>{% endif %}
+            <th>Адрес</th>
+            <th>Дата работ</th>
+            <th>Статус</th>
+            <th>Сумма</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            {% if user.is_staff %}<td>{{ order.client.user.get_full_name }}</td>{% endif %}
+            {% if user.is_staff %}<td>{{ order.employee.user.get_full_name|default:"—" }}</td>{% endif %}
+            <td>{{ order.address|truncatechars:30 }}</td>
+            <td>{{ order.scheduled_date|date:"d.m.Y" }}</td>
+            <td>
+                {% if order.status == 'pending' %}<span class="badge badge-warning">Ожидание</span>
+                {% elif order.status == 'confirmed' %}<span class="badge badge-info">Подтверждён</span>
+                {% elif order.status == 'in_progress' %}<span class="badge badge-secondary">В работе</span>
+                {% elif order.status == 'completed' %}<span class="badge badge-success">Завершён</span>
+                {% elif order.status == 'cancelled' %}<span class="badge badge-danger">Отменён</span>
+                {% endif %}
+            </td>
+            <td>{{ order.total_price }} BYN</td>
+            <td>
+                <a href="{% url 'order_detail' order.pk %}" class="btn btn-secondary" style="padding:4px 8px;font-size:12px;">Просмотр</a>
+                {% if order.status == 'pending' %}
+                <a href="{% url 'order_edit' order.pk %}" class="btn btn-primary" style="padding:4px 8px;font-size:12px;">Изменить</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="card"><p>Заказов нет.</p></div>
+{% endif %}
+{% endblock %}

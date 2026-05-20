@@ -1,0 +1,62 @@
+{% extends "cleaning_app/base.html" %}
+{% block title %}Отзывы — КлинингПро{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+<div>
+<div class="card">
+    <h1>Отзывы клиентов</h1>
+</div>
+{% if reviews %}
+    {% for review in reviews %}
+    <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>{{ review.name }}</strong>
+            <span>
+                {% for i in "12345" %}
+                    {% if forloop.counter <= review.rating %}⭐{% endif %}
+                {% endfor %}
+                <span class="badge badge-info">{{ review.rating }}/5</span>
+            </span>
+        </div>
+        {% if review.client %}
+        <p style="font-size:12px;color:#888;margin:4px 0;">Клиент: {{ review.client.user.get_full_name }}</p>
+        {% endif %}
+        <p style="margin-top:8px;line-height:1.6;">{{ review.text }}</p>
+        <p style="font-size:12px;color:#999;margin-top:6px;">{{ review.created_at|date:"d.m.Y" }}</p>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="card"><p>Отзывов пока нет. Будьте первым!</p></div>
+{% endif %}
+</div>
+
+<div>
+<div class="card">
+    <h3>Оставить отзыв</h3>
+    {% if user.is_authenticated %}
+    <form method="post" style="margin-top:12px;">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                <p style="color:red;font-size:12px;">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+    </form>
+    {% else %}
+    <p style="margin-top:10px;color:#666;">
+        <a href="{% url 'login' %}">Войдите</a> или
+        <a href="{% url 'register' %}">зарегистрируйтесь</a>, чтобы оставить отзыв.
+    </p>
+    {% endif %}
+</div>
+</div>
+</div>
+{% endblock %}

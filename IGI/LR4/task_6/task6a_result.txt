@@ -1,0 +1,9 @@
+           Temperature (C)  Humidity
+Day                                 
+Friday            9.472222      0.89
+Saturday          9.377778      0.89
+Sunday           10.422222      0.62
+Monday           11.183333      0.80
+Tuesday           8.633333      0.87
+Wednesday         7.311111      0.82
+Thursday          5.438889      0.88

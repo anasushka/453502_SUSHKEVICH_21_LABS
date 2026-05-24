@@ -1,0 +1,7 @@
+Figure: Параллелограмм
+d1 = 10.00
+d2 = 15.00
+Angle between diagonals = 60.00°
+Color: green
+Label: igi
+Area: 64.95

@@ -1,0 +1,47 @@
+Source file: /home/anastacia/453502_SUSHKEVICH_21/IGI/LR4/task_2/input.txt
+Total sentences: 8
+Declarative sentences: 5
+Interrogative sentences: 2
+Imperative sentences: 1
+Average sentence length (characters, words only): 20.00
+Average word length: 5.16
+Total words: 31
+Total smileys: 2
+
+Phones (9 digits, start with 29):
+291234567, 299876543
+
+Words with second letter consonant and third letter vowel:
+Смайлики, Краска, стол, книга, Красный, стол, книга
+
+Letter frequency:
+а: 10
+б: 1
+в: 2
+г: 5
+д: 10
+е: 16
+ж: 1
+з: 1
+и: 11
+й: 6
+к: 7
+л: 7
+м: 5
+н: 12
+о: 19
+п: 6
+р: 5
+с: 8
+т: 9
+у: 1
+ф: 1
+х: 3
+ч: 2
+ш: 2
+ы: 4
+ь: 1
+я: 5
+
+Comma-separated phrases in alphabetical order:
+белая книга, дом. Красный шар, зимний вечер, книга, мы пойдем. Телефоны 291234567 и 299876543 подходят. Смайлики: ;---------[[[[[[[[ и :---)))) тоже? Нет, последнее не подходит. Краска, Сегодня хорошая погода! Вы пойдете гулять? Конечно, синий стол, стол

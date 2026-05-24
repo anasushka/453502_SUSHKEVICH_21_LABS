@@ -1,0 +1,3 @@
+Average temperature in hottest days (upper decile): 25.62
+Average temperature in coldest days (lower decile): -3.12
+Hottest / coldest ratio: 8.21

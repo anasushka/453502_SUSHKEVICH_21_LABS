@@ -32,7 +32,7 @@ logger = logging.getLogger('cleaning_app')
 
 
 # ---------------------------------------------------------------------------
-# Chart helpers (Python/matplotlib — не JS)
+# Chart helpers (Python/matplotlib)
 # ---------------------------------------------------------------------------
 
 def _chart_to_base64(fig):
@@ -121,16 +121,23 @@ def _get_weather():
 
 
 def _get_user_geo(request):
-    from django.conf import settings
     try:
         ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
         if ',' in ip:
             ip = ip.split(',')[0].strip()
         if ip in ('127.0.0.1', 'localhost', '::1', ''):
             ip = '8.8.8.8'
-        url = settings.IP_API_URL.format(ip=ip)
-        resp = requests.get(url, timeout=5)
-        return resp.json()
+        resp = requests.get(f'http://ip-api.com/json/{ip}?fields=status,message,country,regionName,city,isp', timeout=5)
+        data = resp.json()
+        if data.get('status') != 'success':
+            logger.warning('IP API returned non-success: %s', data)
+            return None
+        return {
+            'city': data.get('city', ''),
+            'country_name': data.get('country', ''),
+            'region': data.get('regionName', ''),
+            'isp': data.get('isp', ''),
+        }
     except Exception as exc:
         logger.warning('IP API error: %s', exc)
         return None

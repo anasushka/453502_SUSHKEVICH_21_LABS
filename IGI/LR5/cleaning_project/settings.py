@@ -70,18 +70,40 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'ru-ru'
-TIME_ZONE = 'Europe/Minsk'
+LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE', 'ru-ru')
+TIME_ZONE = os.environ.get('TIME_ZONE', 'Europe/Minsk')
 USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Cloudinary для media-файлов в продакшене (Render.com)
+CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL', '')
+if CLOUDINARY_URL:
+    import cloudinary
+    cloudinary.config(cloudinary_url=CLOUDINARY_URL)
+    STORAGES = {
+        'default': {
+            'BACKEND': 'cleaning_project.cloudinary_storage.CloudinaryStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        },
+    }
+else:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        },
+    }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -147,4 +169,3 @@ if not DEBUG:
 
 # External API settings
 WEATHER_API_URL = 'https://wttr.in/Minsk?format=j1'
-IP_API_URL = 'https://ipapi.co/{ip}/json/'
